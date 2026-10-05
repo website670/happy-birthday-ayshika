@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500&display=swap');
+
+        :root {
+            --bg-color: #fdfaf6;
+            --text-dark: #4a403a;
+            --text-light: #8a7d76;
+            --accent-pink: #e8b4b8;
+            --accent-pink-dark: #d59a9e;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #app {
+            background-color: var(--bg-color);
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+
+        /* --- Page Animations & Mobile Friendly Layout --- */
+        .page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 30px 20px;
+            text-align: center;
+            opacity: 0;
+            width: 100%;
+        }
+
+        .page.active {
+            display: flex;
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .page.fade-out {
+            display: flex;
+            animation: fadeOutSlide 0.3s ease forwards;
+        }
+
+        @keyframes slideUpFade {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOutSlide {
+            0% { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+
+        .pink-text {
+            color: var(--accent-pink-dark);
+            font-style: italic;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* --- Page 1: Envelope --- */
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-top: 40px;
+        }
+        .envelope-wrapper:active {
+            transform: scale(0.95);
+        }
+        .envelope {
+            width: 200px;
+            height: 130px;
+            background: #f4e3e3;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-top: 70px solid #ecd5d5;
+            z-index: 2;
+        }
+        .wax-seal {
+            width: 40px;
+            height: 40px;
+            background: #c76b72;
+            border-radius: 50%;
+            position: absolute;
+            top: 50px;
+            z-index: 3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .wax-seal::after {
+            content: '❤';
+            color: #fff;
+            font-size: 1.2rem;
+        }
+        .instruction {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* --- Music Player --- */
+        .music-player {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin: 20px 0;
+            width: 100%;
+            cursor: pointer;
+        }
+        .play-btn {
+            width: 35px;
+            height: 35px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            padding-left: 3px;
+        }
+        .song-info { text-align: left; }
+        .song-title { font-size: 0.85rem; font-weight: 500; }
+        .song-artist { font-size: 0.7rem; color: var(--text-light); }
+
+        /* --- Custom Buttons (Next & Prev) --- */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .btn {
+            position: relative;
+            background: var(--accent-pink);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 30px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(232, 180, 184, 0.4);
+            transition: transform 0.2s;
+            overflow: hidden;
+            z-index: 1;
+            flex: 2; /* takes more space by default */
+        }
+        .btn-prev {
+            background: #d4c4bc; /* Neutral muted color */
+            flex: 1; /* smaller button */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            background: #d81b60;
+            width: 0%;
+            z-index: -1;
+            transition: width 1s ease;
+        }
+        .btn-prev::before {
+            background: #b5a49c;
+        }
+        .btn:hover::before {
+            width: 100%;
+        }
+
+        /* --- Other Elements --- */
+        .cute-gif { width: 120px; margin: 20px 0; border-radius: 10px; }
+        .main-message { font-size: 0.9rem; line-height: 1.6; margin: 20px 0; color: var(--text-dark); }
+        
+        /* --- Album View --- */
+        .album-nav { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            width: 100%; 
+            gap: 10px; 
+        }
+        .polaroid { 
+            flex: 1;
+            background: white; 
+            padding: 10px 10px 45px 10px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+            border-radius: 5px; 
+            margin: 20px 0; 
+            position: relative; 
+        }
+        .polaroid img { width: 100%; height: 250px; object-fit: cover; border-radius: 3px; }
+        .polaroid-caption { font-family: 'Caveat', 'Playfair Display', cursive; font-size: 1.2rem; position: absolute; bottom: 12px; left: 0; width: 100%; color: #333; }
+        
+        .nav-arrow { 
+            background: var(--accent-pink); 
+            border: none; 
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem; 
+            color: white; 
+            cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(232, 180, 184, 0.5);
+            transition: transform 0.2s;
+        }
+        .nav-arrow:active {
+            transform: scale(0.9);
+        }
+
+        /* --- Page 4: Collage --- */
+        .collage-container {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            height: 320px;
+            margin: 30px auto;
+        }
+        .collage-pic {
+            position: absolute;
+            border: 6px solid #fff; /* White polaroid-style borders */
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            width: 140px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 2px;
+            transition: transform 0.3s;
+        }
+        .cp-1 { top: 10px; left: 10px; transform: rotate(-12deg); z-index: 1; }
+        .cp-2 { top: 15px; right: 10px; transform: rotate(12deg); z-index: 2; }
+        .cp-3 { bottom: 15px; left: 5px; transform: rotate(-8deg); z-index: 3; }
+        .cp-4 { bottom: 20px; right: 5px; transform: rotate(10deg); z-index: 4; }
+        .cp-5 { 
+            top: 50%; left: 50%; 
+            width: 160px; height: 115px; 
+            transform: translate(-50%, -50%) rotate(2deg); /* Center image overlaps all */
+            z-index: 5; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25); 
+        }
+
+        /* --- Wishes View --- */
+        .wishes-container { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; width: 100%; max-height: 55vh; overflow-y: auto; padding: 5px; }
+        .wish-card { flex: none; background: var(--card-bg); border-radius: 15px; padding: 20px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.3s; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .wish-card:active { transform: scale(0.98); }
+        .flower-icon { font-size: 2rem; margin-bottom: 10px; }
+        .pick-me { font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; }
+        .wish-text { display: none; font-size: 0.75rem; line-height: 1.5; text-align: center; }
+        .wish-card.opened .flower-icon, .wish-card.opened .pick-me { display: none; }
+        .wish-card.opened .wish-text { display: block; animation: fadeIn 0.5s forwards; }
+
+        /* --- Letter View --- */
+        .letter-container { background: var(--card-bg); padding: 30px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: left; margin: 20px 0; width: 100%; max-height: 50vh; overflow-y: auto; }
+        .letter-text { font-size: 0.9rem; line-height: 1.8; color: var(--text-dark); }
+        .letter-text p { margin-bottom: 15px; }
+
+        /* --- Feedback View --- */
+        .feedback-container {
+            width: 100%;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .feedback-box {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            resize: none;
+            background: #fdfaf6;
+            outline: none;
+        }
+        .feedback-box:focus {
+            border-color: var(--accent-pink-dark);
+        }
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfaf6;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        .voice-btn {
+            background: var(--accent-pink);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .voice-btn.recording {
+            background: #e63946;
+            animation: pulse-record 1.5s infinite;
+        }
+        @keyframes pulse-record {
+            0% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.6); }
+            70% { box-shadow: 0 0 0 12px rgba(230, 57, 70, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+        }
+        .voice-status {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+        
+        /* --- Mobile Phone Optimization --- */
+        @media (max-width: 480px) {
+            body { background-color: var(--bg-color); }
+            #app { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <audio id="bg-music" loop>
+            <source src="chhota-bheem.mp3" type="audio/mpeg">
+        </audio>
+
+        <!-- PAGE 1: ENVELOPE -->
+        <section id="page1" class="page active">
+            <div class="subtitle">✨ MADE WITH SO MUCH LOVE ✨</div>
+            <h1 class="title">Hello Cutieee</h1>
+            <div class="title pink-text" style="font-size: 1.5rem;">happy birthday 🤍</div>
+            
+            <div class="envelope-wrapper" onclick="goToPage('page2')">
+                <div class="envelope">
+                    <div class="wax-seal"></div>
+                </div>
+            </div>
+            
+            <div class="instruction">TAP THE SEAL TO OPEN 💌</div>
+        </section>
+
+        <!-- PAGE 2: MAIN GREETING -->
+        <section id="page2" class="page">
+            <div class="subtitle">💌 HEHEEEE</div>
+            <h1 class="title">Happy Birthday</h1>
+            <div class="title pink-text" style="font-size: 1.8rem;">My cutie Best friend 🤍</div>
+            
+            <img src="https://media.tenor.com/J3tG2R0tZscAAAAi/peach-goma.gif" alt="Cute Cat" class="cute-gif">
+            
+            <p class="main-message">
+                Today is yours. A whole garden of wishes, for every laugh we've shared, every silly moment, and every reason you make the world brighter. HAPPYYYY BIRTHDAYYYYY CUTIEEEEE
+            </p>
+
+            <div class="music-player" onclick="toggleMusic()">
+                <div class="play-btn" id="play-btn">▶</div>
+                <div class="song-info">
+                    <div class="song-title">Chhota Bheem Theme Song</div>
+                    <div class="song-artist">DEDICATED TO KIRMADA</div>
+                </div>
+            </div>
+            <p style="font-size: 0.7rem; color: var(--text-light); font-style: italic;">
+                I picked this one, because it always reminds me of you 😂
+            </p>
+
+            <div class="button-group">
+                <button class="btn btn-prev" onclick="goToPage('page1')">⬅</button>
+                <button class="btn" onclick="goToPage('page3')">SEE OUR ALBUM ➔</button>
+            </div>
+        </section>
+
+        <!-- PAGE 3: ALBUM -->
+        <section id="page3" class="page">
+            <div class="subtitle">📸 OUR ALBUM</div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 5px;">Some cool album for you</h2>
+            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 20px;">a few of my favourite moments with you 🤍</div>
+
+            <div class="album-nav">
+                <button class="nav-arrow" onclick="changeImage(-1)">❮</button>
+                <div class="polaroid">
+                    <img id="album-img" src="" alt="Memory">
+                    <div class="polaroid-caption" id="album-caption"></div>
+                </div>
+                <button class="nav-arrow" onclick="changeImage(1)">❯</button>
+            </div>
+            
+            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 10px;">
+                MEMORY <span id="img-counter">1</span> / 5
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-prev" onclick="goToPage('page2')">⬅ BACK</button>
+                <button class="btn" onclick="goToPage('page4')">SEE COLLAGE ➔</button>
+            </div>
+        </section>
+
+        <!-- PAGE 4: COLLAGE -->
+        <section id="page4" class="page">
+            <div class="subtitle">🎨 ALL TOGETHER</div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 5px;">The Big Picture</h2>
+            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 10px;">just a messy, beautiful collage of us 🤍</div>
+
+            <div class="collage-container">
+                <img src="pic1.jpg" class="collage-pic cp-1" alt="Collage 1">
+                <img src="pic2.jpg" class="collage-pic cp-2" alt="Collage 2">
+                <img src="pic3.jpg" class="collage-pic cp-3" alt="Collage 3">
+                <img src="pic4.jpg" class="collage-pic cp-4" alt="Collage 4">
+                <img src="pic5.jpg" class="collage-pic cp-5" alt="Collage 5">
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-prev" onclick="goToPage('page3')">⬅ BACK</button>
+                <button class="btn" onclick="goToPage('page5')">PICK A WISH ➔</button>
+            </div>
+        </section>
+
+        <!-- PAGE 5: WISHES -->
+        <section id="page5" class="page">
+            <div class="subtitle">🌸 THREE WISHES</div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 5px;">a tiny bouquet of wishes</h2>
+            <div style="font-size: 0.8rem; color: var(--text-light);">pick each flower — there's a little wish inside 🤍</div>
+
+            <div class="wishes-container">
+                <div class="wish-card" onclick="this.classList.add('opened')">
+                    <div class="flower-icon">🌸</div>
+                    <div class="pick-me">PICK ME</div>
+                    <div class="wish-text">✨ <strong>Tor ar amar sei late night harry potter sessions.</strong><br><br>I wish je amra oi din gulo te phire jay abar and experience all of those again. The fear, the video call, the thrill of the next moment je ki hobe and stuff 🤍</div>
+                </div>
+                <div class="wish-card" onclick="this.classList.add('opened')">
+                    <div class="flower-icon">🌺</div>
+                    <div class="pick-me">PICK ME</div>
+                    <div class="wish-text">🌟 <strong>The way u look so beautiful effortlessly</strong><br><br>Sotti bolchi, how do you even do it? Tui bina sajleo tor theke chokh sorano muskil. Keep glowing exactly the way you do, inside and out. ✨</div>
+                </div>
+                <div class="wish-card" onclick="this.classList.add('opened')">
+                    <div class="flower-icon">🌼</div>
+                    <div class="pick-me">PICK ME</div>
+                    <div class="wish-text">💖 <strong>Here's to us and the year ahead</strong><br><br>May this year give you everything you deserve. Tor moton unapologetically real ar pagli ekta best friend paoa is a blessing. Let's make more chaotic memories together! 🥂</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-prev" onclick="goToPage('page4')">⬅ BACK</button>
+                <button class="btn" onclick="goToPage('page6')">READ LETTER ➔</button>
+            </div>
+        </section>
+
+        <!-- PAGE 6: LETTER -->
+        <section id="page6" class="page">
+            <div class="subtitle">💌 A LETTER, JUST FOR YOU</div>
+            <h1 class="title pink-text" style="font-size: 1.8rem; margin-bottom: 20px;">My cutie Best friend,</h1>
+            
+            <div class="letter-container">
+                <div class="letter-text">
+                    <p>Sorry insta te je message ta diyechi otakei kinda copy korchi 😅</p>
+                    
+                    <p>Happy birthday to u Kirmada (aka amar priyo bon). Honestly, tui amar jibone na thakle je ami ki bhabe mentally bhalo thaktam ami jani na. I selfishly hope je onno karor kache tor moto girl bestfriend jate na thakuk, cause you are just amazing! 🤍</p>
+                    
+                    <p>Tui na thakle ami kake chiratam? Kar kache opinion nitam about things jegulo onno kaoke jiggasa korte pari na? And sob theke boro kotha, kar sathe chugli kortam about anything or anyone? 😂 You are the only person who doesn't really judge me on anything, rather amar haan te haan milas. You are the one who knows me truly and without any filters.</p>
+                    
+                    <p>Just ajker din ta te onek phurti kor, ei bhebe je we don't have a tomorrow. Bhalo thak and party hard! 🎉</p>
+
+                    <p>At last, etai bolbo je: Just be yourself and be amazing.</p>
+
+                    <p style="margin-top: 30px; font-weight: 500;">Love you, my cute little best friend,<br>Your handsome and nonchalant bhai 🤍</p>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-prev" onclick="goToPage('page5')">⬅ BACK</button>
+                <button class="btn" onclick="goToPage('page7')">ONE LAST THING ➔</button>
+            </div>
+        </section>
+
+        <!-- PAGE 7: THANK YOU & FEEDBACK -->
+        <section id="page7" class="page">
+            <div class="subtitle">✨ THE END ✨</div>
+            <h1 class="title">That's a wrap!</h1>
+            <p class="main-message">The presentation is officially over. But before you go, I need your highly esteemed opinion on this whole thing (and maybe on me too 👀).</p>
+
+            <div class="feedback-container">
+                <textarea id="feedback-text" class="feedback-box" placeholder="Write your thoughts here... did you like it? Did I do a good job? Spill everything!"></textarea>
+                
+                <div class="voice-controls">
+                    <div class="voice-status" id="voice-status">Tap the mic to leave a voice note!</div>
+                    <button class="voice-btn" id="record-btn" onclick="toggleRecording()">🎤</button>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-prev" onclick="goToPage('page6')">⬅ BACK</button>
+                <button class="btn" onclick="saveFeedback()">SAVE & SEND ➔</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // --- Navigation Logic ---
+        let isAnimating = false;
+        function goToPage(pageId) {
+            if (isAnimating) return;
+            const currentPage = document.querySelector('.page.active');
+            
+            if (currentPage && currentPage.id !== pageId) {
+                isAnimating = true;
+                currentPage.classList.add('fade-out');
+                currentPage.classList.remove('active');
+                
+                setTimeout(() => {
+                    currentPage.classList.remove('fade-out');
+                    const nextPage = document.getElementById(pageId);
+                    if (nextPage) {
+                        nextPage.classList.add('active');
+                    }
+                    window.scrollTo(0, 0); 
+                    isAnimating = false;
+                }, 300); 
+            } else if (!currentPage) {
+                document.getElementById(pageId).classList.add('active');
+            }
+        }
+
+        // --- Music Player Logic ---
+        const audio = document.getElementById('bg-music');
+        const playBtn = document.getElementById('play-btn');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                playBtn.innerHTML = "▶";
+            } else {
+                audio.play().catch(e => console.log("Audio play failed:", e));
+                playBtn.innerHTML = "⏸";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // --- Album Logic ---
+        const memories = [
+            {
+                img: "pic1.jpg", 
+                caption: "First Real hangout👀❤️‍🩹"
+            },
+            {
+                img: "pic2.jpg",
+                caption: "Miss India Who?!👀"
+            },
+            {
+                img: "pic3.jpg",
+                caption: "No caption needed💕"
+            },
+            {
+                img: "pic4.jpg",
+                caption: "Bura na mano holi haii!💚💛"
+            },
+            {
+                img: "pic5.jpg",
+                caption: "You slay gurllll! 💅🖤"
+            }
+        ];
+
+        let currentImgIndex = 0;
+        const imgElement = document.getElementById('album-img');
+        const captionElement = document.getElementById('album-caption');
+        const counterElement = document.getElementById('img-counter');
+
+        function updateAlbum() {
+            imgElement.src = memories[currentImgIndex].img;
+            captionElement.innerText = memories[currentImgIndex].caption;
+            counterElement.innerText = currentImgIndex + 1;
+        }
+
+        function changeImage(direction) {
+            currentImgIndex += direction;
+            if (currentImgIndex >= memories.length) currentImgIndex = 0;
+            if (currentImgIndex < 0) currentImgIndex = memories.length - 1;
+            updateAlbum();
+        }
+        updateAlbum();
+
+        // --- Recording & Saving Feedback Logic ---
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob = null;
+        const recordBtn = document.getElementById('record-btn');
+        const statusText = document.getElementById('voice-status');
+
+        async function toggleRecording() {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                recordBtn.classList.remove('recording');
+                recordBtn.innerHTML = "✅"; 
+                statusText.innerText = "Voice note recorded!";
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = e => {
+                    audioChunks.push(e.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    audioChunks = []; 
+                };
+                
+                mediaRecorder.start();
+                recordBtn.classList.add('recording');
+                recordBtn.innerHTML = "⏹"; 
+                statusText.innerText = "Recording... tap square to stop.";
+            } catch (err) {
+                alert("Microphone access is needed to record a voice note! 🥺");
+            }
+        }
+
+        function saveFeedback() {
+            const textFeedback = document.getElementById('feedback-text').value;
+
+            if (textFeedback.trim() === "" && !audioBlob) {
+                alert("You gotta write or record something first! 😤");
+                return;
+            }
+
+            if (textFeedback.trim() !== "") {
+                const textBlob = new Blob([textFeedback], { type: 'text/plain' });
+                downloadBlob(textBlob, 'Kirmada_Feedback.txt');
+            }
+
+            if (audioBlob) {
+                downloadBlob(audioBlob, 'Kirmada_VoiceNote.webm');
+            }
+
+            alert("Done! ✨ The files have been downloaded to your phone/laptop. PLEASE send them directly to me on WhatsApp so I can see/hear them! 🤍");
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
